@@ -1,9 +1,26 @@
 #!/bin/sh
 
-MACPORTS=/opt/local/lib
+SYSLIBS=/usr/lib
+MACPORTS=/usr/local/lib
 GARGDIST=build/dist
-DYLIBS=support/dylibs
+DYLIBSLIST=support/dylibs
 BUNDLE=Gargoyle.app/Contents
+
+count=0
+for lib in `cat $DYLIBSLIST`
+do
+  if [[ -e "$MACPORTS/$lib" ]];
+  then
+    LIBPATHS[$count]="$MACPORTS/$lib";
+  elif  [[ -e "$SYSLIBS/$lib" ]];
+  then
+    LIBPATHS[$count]="$SYSLIBS/$lib";
+  else
+    echo "Unable to find dylib $lib in $MACPORTS or $SYSLIBS"
+    exit;
+  fi
+  count=$((${count}+1))
+done
 
 rm -rf Gargoyle.app
 mkdir -p $BUNDLE/MacOS
@@ -16,31 +33,38 @@ jam install
 
 for file in `ls $GARGDIST`
 do
-for lib in `cat $DYLIBS`
-do
-install_name_tool -change $MACPORTS/$lib @executable_path/../Frameworks/$lib $GARGDIST/$file
+  for libpath in "${LIBPATHS[@]}"
+  do
+    lib=`basename $libpath`
+    install_name_tool -change $libpath @executable_path/../Frameworks/$lib $GARGDIST/$file
+  done
+  install_name_tool -change @executable_path/libgarglk.dylib @executable_path/../Frameworks/libgarglk.dylib $GARGDIST/$file
 done
-install_name_tool -change @executable_path/libgarglk.dylib @executable_path/../Frameworks/libgarglk.dylib $GARGDIST/$file
-done
+
 install_name_tool -id @executable_path/../Frameworks/libgarglk.dylib $GARGDIST/libgarglk.dylib
 
 for file in `ls $GARGDIST | grep -v .dylib | grep -v gargoyle`
 do
-cp -f $GARGDIST/$file $BUNDLE/PlugIns
+  echo "Copying to $BUNDLE/PlugIns: $GARGDIST/$file"
+  cp -f $GARGDIST/$file $BUNDLE/PlugIns
 done
 
-for lib in `cat $DYLIBS`
+for libpath in "${LIBPATHS[@]}"
 do
-cp $MACPORTS/$lib $BUNDLE/Frameworks
+  echo "Copying to $BUNDLE/Frameworks: $libpath"
+  cp $libpath $BUNDLE/Frameworks
 done
+chmod 644 $BUNDLE/Frameworks/*
 
-for dylib in `cat $DYLIBS`
+for dylibpath in "${LIBPATHS[@]}"
 do
-for lib in `cat $DYLIBS`
-do
-install_name_tool -change $MACPORTS/$lib @executable_path/../Frameworks/$lib $BUNDLE/Frameworks/$dylib
-done
-install_name_tool -id @executable_path/../Frameworks/$dylib $BUNDLE/Frameworks/$dylib
+  dylib=`basename $dylibpath`
+  for libpath in "${LIBPATHS[@]}"
+  do
+    lib=`basename $libpath`
+    install_name_tool -change $libpath @executable_path/../Frameworks/$lib $BUNDLE/Frameworks/$dylib
+  done
+  install_name_tool -id @executable_path/../Frameworks/$dylib $BUNDLE/Frameworks/$dylib
 done
 
 cp -f garglk/launcher.plist $BUNDLE/Info.plist

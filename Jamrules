@@ -141,14 +141,14 @@ switch $(OS)
         MAINARCH = -arch x86_64 ;
         CCFLAGS = -Wno-pointer-sign $(MAINARCH) $(ALTARCH) ;
         PKGCONFIG = "pkg-config freetype2" ;
-        GARGLKCCFLAGS = "`$(PKGCONFIG) --cflags libpng`" -I/opt/local/include ;
-        SHRLINKLIBS += "`$(PKGCONFIG) --libs`" -ljpeg -lpng -lz ;
+        GARGLKCCFLAGS = "`$(PKGCONFIG) --cflags libpng`" -I/usr/local/include ;
+        SHRLINKLIBS += "`$(PKGCONFIG) --libs`" -L/usr/local/lib -ljpeg -lpng -lz ;
         LINKLIBS = "`$(PKGCONFIG) --libs`" -lz -lm ;
         FRAMEWORKS = -framework Cocoa -framework OpenGL ;
 
         if $(USESDL) = yes
         {
-            GARGLKCCFLAGS += -I/opt/local/include/SDL ;
+            GARGLKCCFLAGS += -I/usr/local/include/SDL ;
             SHRLINKLIBS += -lSDL_mixer -lSDL -lsmpeg -lvorbisfile ;
         }
 

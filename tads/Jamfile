@@ -33,8 +33,8 @@ if $(OS) = LINUX || $(OS) = SOLARIS
 
 if $(OS) = MACOSX
 {
-    SubDirCcFlags -headerpad_max_install_names $(MAINARCH) $(ALTARCH) ;
-    LINKFLAGS = -headerpad_max_install_names $(MAINARCH) $(ALTARCH) ;
+    SubDirCcFlags $(MAINARCH) $(ALTARCH) ;
+    LINKFLAGS = $(MAINARCH) $(ALTARCH) ;
 }
 
 SEARCH_SOURCE =

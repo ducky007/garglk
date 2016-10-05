@@ -12,7 +12,7 @@ mkdir -p $BUNDLE/Resources
 mkdir -p $BUNDLE/PlugIns
 
 rm -rf $GARGDIST
-jam -sUNIVERSAL=yes install
+jam install
 
 for file in `ls $GARGDIST`
 do
@@ -55,4 +55,4 @@ mkdir $BUNDLE/Resources/Fonts
 cp fonts/LiberationMono*.ttf $BUNDLE/Resources/Fonts
 cp fonts/LinLibertine*.otf $BUNDLE/Resources/Fonts
 
-hdiutil create -ov -srcfolder Gargoyle.app/ gargoyle-2011.1-mac.dmg
+hdiutil create -ov -srcfolder Gargoyle.app/ gargoyle-2015.1-mac.dmg

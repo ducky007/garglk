@@ -143,7 +143,7 @@ switch $(OS)
         PKGCONFIG = "pkg-config freetype2" ;
         GARGLKCCFLAGS = "`$(PKGCONFIG) --cflags libpng`" -I/usr/local/include ;
         SHRLINKLIBS += "`$(PKGCONFIG) --libs`" -L/usr/local/lib -ljpeg -lpng -lz ;
-        LINKLIBS = "`$(PKGCONFIG) --libs`" -lz -lm ;
+        LINKLIBS = "`$(PKGCONFIG) --libs`" -L/usr/local/lib -lSDL -lSDL_mixer -lSDL_sound -ljpeg -lpng -lz -lm ;
         FRAMEWORKS = -framework Cocoa -framework OpenGL ;
 
         if $(USESDL) = yes

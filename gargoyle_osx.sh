@@ -38,6 +38,10 @@ do
     lib=`basename $libpath`
     install_name_tool -change $libpath @executable_path/../Frameworks/$lib $GARGDIST/$file
   done
+
+  lib=libSDL-1.2.0.dylib
+  install_name_tool -change /usr/local/opt/sdl/lib/$lib @executable_path/../Frameworks/$lib $GARGDIST/$file
+
   install_name_tool -change @executable_path/libgarglk.dylib @executable_path/../Frameworks/libgarglk.dylib $GARGDIST/$file
 done
 
@@ -64,6 +68,10 @@ do
     lib=`basename $libpath`
     install_name_tool -change $libpath @executable_path/../Frameworks/$lib $BUNDLE/Frameworks/$dylib
   done
+
+  lib=libSDL-1.2.0.dylib
+  install_name_tool -change /usr/local/opt/sdl/lib/$lib @executable_path/../Frameworks/$lib $BUNDLE/Frameworks/$dylib
+
   install_name_tool -id @executable_path/../Frameworks/$dylib $BUNDLE/Frameworks/$dylib
 done
 

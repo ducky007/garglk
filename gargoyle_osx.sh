@@ -31,46 +31,64 @@ mkdir -p $BUNDLE/PlugIns
 rm -rf $GARGDIST
 jam install
 
+# Copy all our dylibs into /Frameworks.
+for libpath in "${LIBPATHS[@]}"
+do
+  echo "Copying to $BUNDLE/Frameworks: $libpath"
+  cp $libpath $BUNDLE/Frameworks
+done
+
+# Make them all writable, since we're going to have to adjust their
+# linking paths.
+chmod 644 $BUNDLE/Frameworks/*
+
+# Go through the interpreter binaries. For each one, adjust the linking path
+# of its dylibs to point to the Frameworks directory (instead of 
+# /usr/local/lib or what have you).
+
 for file in `ls $GARGDIST`
 do
-  for libpath in "${LIBPATHS[@]}"
+  for libpath in `otool -L $GARGDIST/$file | sed -E -n 's/[[:space:]]([/][^[:space:]]+[.]dylib) .*$/\1/p' | grep -E -v '/libSystem|/libobjc|/libc[+][+]'`
   do
     lib=`basename $libpath`
-    install_name_tool -change $libpath @executable_path/../Frameworks/$lib $GARGDIST/$file
+    if [[ -e "$BUNDLE/Frameworks/$lib" ]];
+    then
+      install_name_tool -change $libpath @executable_path/../Frameworks/$lib $GARGDIST/$file;
+    else
+      echo "Frameworks does not contain $lib ($libpath)"
+      exit;
+    fi
   done
-
-  lib=libSDL-1.2.0.dylib
-  install_name_tool -change /usr/local/opt/sdl/lib/$lib @executable_path/../Frameworks/$lib $GARGDIST/$file
 
   install_name_tool -change @executable_path/libgarglk.dylib @executable_path/../Frameworks/libgarglk.dylib $GARGDIST/$file
 done
 
+# Adjust the path of libgarglk within itself.
 install_name_tool -id @executable_path/../Frameworks/libgarglk.dylib $GARGDIST/libgarglk.dylib
 
+# Copy the interpreters to the /PlugIns directory.
 for file in `ls $GARGDIST | grep -v .dylib | grep -v gargoyle`
 do
   echo "Copying to $BUNDLE/PlugIns: $GARGDIST/$file"
   cp -f $GARGDIST/$file $BUNDLE/PlugIns
 done
 
-for libpath in "${LIBPATHS[@]}"
-do
-  echo "Copying to $BUNDLE/Frameworks: $libpath"
-  cp $libpath $BUNDLE/Frameworks
-done
-chmod 644 $BUNDLE/Frameworks/*
-
+# Adjust the linking paths of the dylibs within the dylibs themselves.
 for dylibpath in "${LIBPATHS[@]}"
 do
   dylib=`basename $dylibpath`
-  for libpath in "${LIBPATHS[@]}"
+
+  for libpath in `otool -L $BUNDLE/Frameworks/$dylib | sed -E -n 's/[[:space:]]([/][^[:space:]]+[.]dylib) .*$/\1/p' | grep -E -v '/libSystem|/libobjc|/libc[+][+]'`
   do
     lib=`basename $libpath`
-    install_name_tool -change $libpath @executable_path/../Frameworks/$lib $BUNDLE/Frameworks/$dylib
+    if [[ -e "$BUNDLE/Frameworks/$lib" ]];
+    then
+      install_name_tool -change $libpath @executable_path/../Frameworks/$lib $BUNDLE/Frameworks/$dylib
+    else
+      echo "Frameworks does not contain $lib ($libpath)"
+      exit;
+    fi
   done
-
-  lib=libSDL-1.2.0.dylib
-  install_name_tool -change /usr/local/opt/sdl/lib/$lib @executable_path/../Frameworks/$lib $BUNDLE/Frameworks/$dylib
 
   install_name_tool -id @executable_path/../Frameworks/$dylib $BUNDLE/Frameworks/$dylib
 done

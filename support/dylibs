@@ -4,6 +4,7 @@ libiconv.2.dylib
 libjpeg.8.dylib
 libpng16.16.dylib
 libSDL_mixer-1.2.0.dylib
+libSDL_sound-1.0.1.dylib
 libSDL-1.2.0.dylib
 libsmpeg-0.4.0.dylib
 libvorbisfile.3.dylib

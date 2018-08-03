@@ -1,0 +1,18 @@
+Gargoyle 2018.1:
+
+The major feature of this release is updated interpreters. The following interpreters have been updated:
+  • agility
+  • advsys
+  • alan3
+  • bocfel
+  • git
+  • glulxe
+  • hugo
+  • jacl
+  • tads
+
+Other changs:
+
+• An interpreter for Scott Adams games has been added.
+• Text-to-speech support has been added.
+• Improved support for OS X.
